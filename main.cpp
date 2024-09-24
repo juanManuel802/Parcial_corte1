@@ -19,12 +19,12 @@ private:
         registroCorr = 0;
         registroExt = 0;
     }
-    string getMarca() cont {return marca;}
+    string getMarca() const {return marca;}
     int getCapacidadCorr() const {return capacidadCorr;}
     int getCapacidadExt() const {return capacidadExt;}
     int getCantidadCorr() const {return cantidadCorr;}
     int getCantidadExt() const {return cantidadExt;}
-    void setMarca() const {return marca;}
+    void setMarca( string marca) {this-> marca = marca;}
     void setCapacidad(int capacidadCorr, int capacidadExtra) {this->capacidadCorr = capacidadCorr; this->capacidadExt = capacidadExtra;}
     void setCantidad(int cantidadCorr, int cantidadExtra) {this->cantidadCorr = cantidadCorr; this->cantidadExt = cantidadExtra;}
     void setCantidadCorr(int corr) {cantidadCorr = corr;}
@@ -125,7 +125,7 @@ class Cliente {
                 cout << "El cliente " << getNombre() << " no tiene suficiente dinero" << endl;
             }
         } else {
-            cout << "El operador ha llenado la bomba porque no había suficiente gasolina" << endl;
+            cout << "El operador ha llenado la bomba que no había suficiente gasolina" << bomba.getCantidadCorr() << bomba.getCantidadExt()<<endl;
             //Podria crar otro objeto bomba para igualarlo a mi bomba??
             Operador oper (bomba);
             bomba = oper + bomba; //this no va porque el primer valor es de un operador
@@ -135,13 +135,23 @@ class Cliente {
 };
 
 
-
+void play (Cliente &cliente, Bombas &bomba) {
+    string tipG;
+    int gal;
+    bool quit;
+    cout << "Que tipo de gasolina deseas tanquear" << endl;
+    cin >> tipG;
+    cout << "Cuanto deseas tanquear?" << endl;
+    cin >> gal;
+    cliente.comprarGasolina(tipG,gal,bomba);
+    cout << "Cliente " << cliente.getNombre() << ":\nExtra:  " << cliente.getExtra() <<"\nCorriente: "<<cliente.getCorriente()<<endl;
+    
+}
 
 int main()
 {
-    string tipG;
     bool quit = true;
-    int count = 1, gal;
+    int count = 1;
     vector<Bombas> bombas;
     vector<Cliente> clientes;
   while (quit) {
@@ -196,30 +206,34 @@ int main()
         quit = quit == 1;
     }
     //Parte de selección de objetos a utilizar
-    int opCl, opBm;
-    cout << "Selecciona un cliente: \n";
-    for (int i = 0; i < clientes.size(); i++) {
-        printf("%d) %s.\n", i+1, clientes[i].getNombre().c_str());
-    }
-    cin >> opCl;
-    opCl--;
+    quit = true;
+    while (quit)
+    {
+        int opCl, opBm;
+        cout << "Selecciona un cliente: \n";
+        for (int i = 0; i < clientes.size(); i++) {
+            printf("%d) %s.\n", i+1, clientes[i].getNombre().c_str());
+        }
+        cin >> opCl;
+        opCl--;
 
-    cout << "Selecciona una bomba \n";
-    for (int i = 0; i < bombas.size(); i++) {
-        printf("Bomba %d: Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
-               i + 1, bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
-               bombas[i].getCantidadCorr(), bombas[i].getCantidadExt());
-    }
-    cin >> opBm;
-    opBm--;
+        cout << "Selecciona una bomba \n";
+        for (int i = 0; i < bombas.size(); i++) {
+            printf("Bomba %d: Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
+                i + 1, bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
+                bombas[i].getCantidadCorr(), bombas[i].getCantidadExt());
+        }
+        cin >> opBm;
+        opBm--;
 
-    cout << "Que tipo de gasolina deseas tanquear" << endl;
-    cin >> tipG;
-    cout << "Cuanto deseas tanquear?" << endl;
-    cin >> gal;
-    clientes[opCl].comprarGasolina(tipG,gal,bombas[opBm]);
-    cout << "Cliente " << clientes[opCl].getNombre() << ":\nExtra:  " << clientes[opCl].getExtra() <<"\nCorriente: "<<clientes[opCl].getCorriente()<<endl;
+        play(clientes[opCl],bombas[opBm]);
+        cout << "Deseas continuar? (1 para si, 0 para no)" <<endl;
+        cin >> quit;
+        quit = quit == 1;
+    }
+    
     
 
     return 0;
 }
+//Mostrar m+as datos (verificación de funcionamiento)
