@@ -60,7 +60,8 @@ private:
         return registroMiBomba > (bomba2.registroCorr+bomba2.registroExt);
     }
     void inline mostrarDatos(){
-        cout << getMarca()<<":  Combustible-> Corriente: "<<cantidadCorr << "/"<<capacidadCorr<<" Extra: "<<cantidadCorr<<"/"<<capacidadCorr<<"\n";
+        //Agregar datos de transacciones
+        cout << getMarca()<<":  Combustible-> Corriente: "<<cantidadCorr << " /"<<capacidadCorr<<" Extra: "<<cantidadExt<<" /"<<capacidadExt<<"\n";
     }
 };
 
@@ -112,6 +113,7 @@ class Cliente {
 
             if (consumo>=0) {
                 setDinero(consumo);
+                cout << "Compra exitosa!!!!" << endl;
                 if (gasolina) {
                     bomba.setCantidadCorr(bomba.getCantidadCorr()-cantidad);
                     setCorriente(getCorriente()+cantidad);
@@ -131,7 +133,9 @@ class Cliente {
             bomba = oper + bomba; //this no va porque el primer valor es de un operador
         }
     }
-   
+   void mostrarDatos() {
+    cout << nombre << "-> Dinero: " << dinero << " || cantidad de gasolina que posee-> Corriente: " << corriente << " Extra: " << extra << endl;
+   }
 };
 
 
@@ -205,7 +209,7 @@ int main()
         cin >> quit;
         quit = quit == 1;
     }
-    //Parte de selección de objetos a utilizar
+    //Parte de selección de objetos a utilizar e implementacion de la bomba
     quit = true;
     while (quit)
     {
@@ -216,7 +220,8 @@ int main()
         }
         cin >> opCl;
         opCl--;
-
+        cout << "Cliente seleccionado: ";
+        clientes[opCl].mostrarDatos();
         cout << "Selecciona una bomba \n";
         for (int i = 0; i < bombas.size(); i++) {
             printf("Bomba %d: Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
@@ -225,8 +230,13 @@ int main()
         }
         cin >> opBm;
         opBm--;
+        cout << "Bomba seleccionada: ";
+        bombas[opBm].mostrarDatos();
 
         play(clientes[opCl],bombas[opBm]);
+
+        clientes[opCl].mostrarDatos();
+        bombas[opBm].mostrarDatos();
         cout << "Deseas continuar? (1 para si, 0 para no)" <<endl;
         cin >> quit;
         quit = quit == 1;
