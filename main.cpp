@@ -73,8 +73,9 @@ public:
     Bombas getBomba() const {return bomba;}
 
     void recargarBomba(Bombas &provedor) {
+        system("cls");
         int op;
-        cout << "Hola, soy el provedor. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar la bomba desde otra con suficiente combustible?\n";
+        cout << "\nHola, soy el provedor. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar la bomba desde otra con suficiente combustible?\n";
         cin >> op;
         if (op=1) {
             int cant, op;
@@ -126,6 +127,8 @@ public:
                 break;
             }
             //bomba = this->bomba; 
+        } else if (op=2) {
+            //usar el operador aqui
         }
     }
 
@@ -188,7 +191,7 @@ class Cliente {
         } else {
             //Podria crar otro objeto bomba para igualarlo a mi bomba?? - Funciona, pero es buena práctica?
             Operador oper (bomba);
-            cout << "Insuficiente combustible, redirigiendo con el operador..." << endl;
+            cout << "\nInsuficiente combustible, redirigiendo con el operador..." << endl;
             oper.recargarBomba(provedor);
             bomba = oper.getBomba();
             //comprarGasolina() para volverlo a hacer. ??
@@ -212,8 +215,9 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     cin >> tipG;
     cout << "Cuanto deseas tanquear?" << endl;
     cin >> gal;
-    cliente.comprarGasolina(tipG,gal,bomba,provedor);
-    //cout << "Cliente " << cliente.getNombre() << ":\nExtra:  " << cliente.getExtra() <<"\nCorriente: "<<cliente.getCorriente()<<endl;
+    cliente.comprarGasolina(tipG,gal,bomba,provedor); /*AQUÍ ES EL ERROR DE LÓGICA? (SUPOSICIÓN: los objetos que se cargan a la funcion 
+    comprarGasolina tienen el estado inicial con el que se enviaron a la funcion play, más no el de despues de ejecutar la funcion 
+    comprarGasolina que es la que les cambia el estado) */
     cliente.mostrarDatos();
     cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
     cin >> quit;
