@@ -61,7 +61,7 @@ private:
     }
     void inline mostrarDatos(){
         //Agregar datos de transacciones
-        cout << getMarca()<<":  Combustible-> Corriente: "<<cantidadCorr << " /"<<capacidadCorr<<" Extra: "<<cantidadExt<<" /"<<capacidadExt<<"\n";
+        cout << getMarca()<<":  Combustible-> Corriente: "<<cantidadCorr << " /"<<capacidadCorr<<" Vendlida("<< registroCorr<< ") - Extra: "<<cantidadExt<<" /"<<capacidadExt<<" Venvida(" << registroExt << ")\n";
     }
 };
 
@@ -72,6 +72,64 @@ public:
     Operador(Bombas bomba) {this->bomba = bomba;}
     Bombas getBomba() const {return bomba;}
 
+    void recargarBomba(Bombas &provedor) {
+        int op;
+        cout << "Hola, soy el provedor. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar la bomba desde otra con suficiente combustible?\n";
+        cin >> op;
+        if (op=1) {
+            int cant, op;
+            bool comp;
+            provedor.mostrarDatos();
+            cout << "Qué tipo de combustible deseas transferir desde el operador hasta la bomba " << this->bomba.getMarca() << "?\n1)Corriente\n2)Extra\n3)Ambas";
+            cin >> op;
+            switch (op)
+            {
+            case 1:
+                cout << "Cuanto desdeas transferir de gasolina corriente desde el proveedor hasta la bomba?" << endl;
+                do {
+                    cin >> cant;
+                    //bomba.getCapacidadCorr()-bomba.getCantidadCorr()  Esto es lo que le falta a la bomba de combustible que se quiere proveer para llegar a su capacidad máxima
+                    if (cant < (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
+                        bomba.setCantidadCorr(bomba.getCantidadCorr()+cant);
+                    } else if (cant > (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
+                        bomba.setCantidadCorr(bomba.getCapacidadCorr());
+                        provedor.setCantidadCorr(provedor.getCantidadCorr()-(bomba.getCapacidadCorr()-bomba.getCantidadCorr()));
+                        cout << "Se lleno el tanque de corriente a su capacidad máxima y se devolvió " << cant - (bomba.getCapacidadCorr()-bomba.getCantidadCorr()) << endl;
+                    } else if (cant = 0) {
+                        comp = true;
+                        //Aquí agragar el uso de exepciones
+                        cout << "Ingresa un valor valido" << endl;
+                    }                    
+                } while (comp);
+                bomba.mostrarDatos();
+                break;
+            case 2:
+                cout << "Cuanto desdeas transferir de gasolina extra desde el proveedor hasta la bomba?" << endl;
+                do {
+                    cin >> cant;
+                    //bomba.getCapacidadExt()-bomba.getCantidadExt()  Esto es lo que le falta a la bomba de combustible que se quiere proveer para llegar a su capacidad máxima
+                    if (cant < (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                        bomba.setCantidadExt(bomba.getCantidadExt()+cant);
+                    } else if (cant > (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                        bomba.setCantidadExt(bomba.getCapacidadExt());
+                        provedor.setCantidadExt(provedor.getCantidadExt()-(bomba.getCapacidadExt()-bomba.getCantidadExt()));
+                        cout << "Se lleno el tanque de extra a su capacidad máxima y se devolvió " << cant - (bomba.getCapacidadExt()-bomba.getCantidadExt()) << endl;
+                    } else if (cant = 0) {
+                        comp = true;
+                        //Aquí agragar el uso de exepciones
+                        cout << "Ingresa un valor valido" << endl;
+
+                    }
+                } while (comp);
+                bomba.mostrarDatos();
+            default:
+                break;
+            }
+            //bomba = this->bomba; 
+        }
+    }
+
+    //Este operador solo see aplicará a la bomba proveedor
     Bombas operator+(Bombas &bomba) {
         bomba.setCantidad(bomba.getCapacidadCorr(), bomba.getCapacidadExt());
         return bomba;
@@ -80,27 +138,27 @@ public:
 class Cliente {
     private:
     string nombre;
-    int dinero;
+    float dinero;
     int corriente;
     int extra;
 
     public:
     Cliente(): nombre("Luk"),dinero(30000), corriente(0), extra(0) {}
-    Cliente(string nombre, int dinero, int corriente, int extra) {
+    Cliente(string nombre, float dinero, int corriente, int extra) {
         this->nombre = nombre;
         this->dinero = dinero;
         this->corriente = corriente;
         this->extra = extra;
     }
     string getNombre() const {return nombre;}
-    int getDinero() const {return dinero;}
+    float getDinero() const {return dinero;}
     int getCorriente() const {return corriente;}
     int getExtra()const {return extra;}
     void setDinero(int dinero) {this->dinero = dinero;}
     void setCorriente(int corriente) {this->corriente = corriente;}
     void setExtra(int extra) {this->extra = extra;}
 
-    void comprarGasolina (string tipoGasolina, int cantidad, Bombas &bomba) {
+    void comprarGasolina (string tipoGasolina, int cantidad, Bombas &bomba, Bombas &provedor) {
         bool gasolina = true;
         int consumo;
         consumo = getDinero() - bomba.calcularPrecios(gasolina, cantidad);
@@ -113,7 +171,8 @@ class Cliente {
 
             if (consumo>=0) {
                 setDinero(consumo);
-                cout << "Compra exitosa!!!!" << endl;
+                cout << "Compra exitosa " << getNombre() << "!!!" << endl;
+                cout << "Dinero (- " << bomba.calcularPrecios(gasolina, cantidad)<<"): " << endl;
                 if (gasolina) {
                     bomba.setCantidadCorr(bomba.getCantidadCorr()-cantidad);
                     setCorriente(getCorriente()+cantidad);
@@ -124,13 +183,15 @@ class Cliente {
                     bomba.registrarExt(cantidad);
                 }
             } else {
-                cout << "El cliente " << getNombre() << " no tiene suficiente dinero" << endl;
+                cout << "Saldo insuficiente para " << getNombre() << endl;
             }
         } else {
-            cout << "El operador ha llenado la bomba que no había suficiente gasolina" << bomba.getCantidadCorr() << bomba.getCantidadExt()<<endl;
-            //Podria crar otro objeto bomba para igualarlo a mi bomba??
+            //Podria crar otro objeto bomba para igualarlo a mi bomba?? - Funciona, pero es buena práctica?
             Operador oper (bomba);
-            bomba = oper + bomba; //this no va porque el primer valor es de un operador
+            cout << "Insuficiente combustible, redirigiendo con el operador..." << endl;
+            oper.recargarBomba(provedor);
+            bomba = oper.getBomba();
+            //comprarGasolina() para volverlo a hacer. ??
         }
     }
    void mostrarDatos() {
@@ -139,16 +200,26 @@ class Cliente {
 };
 
 
-void play (Cliente &cliente, Bombas &bomba) {
+void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     string tipG;
-    int gal;
-    bool quit;
+    int gal, gasto;
+    float dineroInicial;
+    bool quit = true;
+    dineroInicial = cliente.getDinero();
+    while (quit)
+    {    
     cout << "Que tipo de gasolina deseas tanquear" << endl;
     cin >> tipG;
     cout << "Cuanto deseas tanquear?" << endl;
     cin >> gal;
-    cliente.comprarGasolina(tipG,gal,bomba);
-    cout << "Cliente " << cliente.getNombre() << ":\nExtra:  " << cliente.getExtra() <<"\nCorriente: "<<cliente.getCorriente()<<endl;
+    cliente.comprarGasolina(tipG,gal,bomba,provedor);
+    //cout << "Cliente " << cliente.getNombre() << ":\nExtra:  " << cliente.getExtra() <<"\nCorriente: "<<cliente.getCorriente()<<endl;
+    cliente.mostrarDatos();
+    cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
+    cin >> quit;
+    quit = quit == 1;
+    }
+    system("cls");
     
 }
 
@@ -158,9 +229,12 @@ int main()
     int count = 1;
     vector<Bombas> bombas;
     vector<Cliente> clientes;
+    //Objeto de clase bomba proveedor de combustible
+    Bombas provedor("Proveedor",10000,10000,10000,10000);
   while (quit) {
         string nombre;
-        int dinero, corriente, extra;
+        int corriente, extra;
+        float dinero;
         printf("Ingresa el nombre del usuario %d: ", count);
         getline(cin, nombre);
         printf("Ingresa el dinero del usuario %d: ", count);
@@ -182,6 +256,7 @@ int main()
         cin.ignore();
         count++;
     } 
+    system("cls");
 
     quit = true;
     while (quit) {
@@ -190,9 +265,9 @@ int main()
         printf("Ingresa la marca de la bomba: ");
         cin >> marca;
         cin.ignore();
-        printf("Ingresa la capacidad de gasolina corriente: ");
+        printf("Ingresa la capacidad máxima de almacenamiento del tanque de gasolina corriente: ");
         cin >> capacidadCorr;
-        printf("Ingresa la capacidad de gasolina extra: ");
+        printf("Ingresa la capacidad máxima de almacenamiento del tanque de gasolina extra: ");
         cin >> capacidadExt;
         printf("Ingresa la cantidad de gasolina corriente: ");
         cin >> cantidadCorr;
@@ -209,6 +284,7 @@ int main()
         cin >> quit;
         quit = quit == 1;
     }
+    system("cls");
     //Parte de selección de objetos a utilizar e implementacion de la bomba
     quit = true;
     while (quit)
@@ -224,8 +300,8 @@ int main()
         clientes[opCl].mostrarDatos();
         cout << "Selecciona una bomba \n";
         for (int i = 0; i < bombas.size(); i++) {
-            printf("Bomba %d: Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
-                i + 1, bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
+            printf("%d)%s-> Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
+                i + 1,bombas[i].getMarca().c_str(), bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
                 bombas[i].getCantidadCorr(), bombas[i].getCantidadExt());
         }
         cin >> opBm;
@@ -233,13 +309,15 @@ int main()
         cout << "Bomba seleccionada: ";
         bombas[opBm].mostrarDatos();
 
-        play(clientes[opCl],bombas[opBm]);
+        play(clientes[opCl],bombas[opBm],provedor);
 
         clientes[opCl].mostrarDatos();
         bombas[opBm].mostrarDatos();
-        cout << "Deseas continuar? (1 para si, 0 para no)" <<endl;
+        system("cls");
+        cout << "Gracias por utilizar nuestro servicio.\nDeseas seguir en el programa? (1 para si, 0 para no)" <<endl;
         cin >> quit;
         quit = quit == 1;
+        system("cls");
     }
     
     
