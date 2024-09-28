@@ -34,9 +34,9 @@ private:
 
     bool verificarCantidad(int Demanda, bool tipoGasolina) {
         if (tipoGasolina) {
-            return Demanda < getCantidadCorr();
+            return Demanda <= getCantidadCorr();
         } else {
-            return Demanda < getCantidadExt();
+            return Demanda <= getCantidadExt();
         }
     }
     int calcularPrecios(bool tipoGasolina, int cantidad) {
@@ -73,7 +73,7 @@ public:
     Bombas getBomba() const {return bomba;}
 
     void recargarBomba(Bombas &provedor) {
-        system("cls");
+        //system("cls");
         int op;
         cout << "\nHola, soy el provedor. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar la bomba desde otra con suficiente combustible?\n";
         cin >> op;
@@ -81,7 +81,7 @@ public:
             int cant, op;
             bool comp;
             provedor.mostrarDatos();
-            cout << "Qué tipo de combustible deseas transferir desde el operador hasta la bomba " << this->bomba.getMarca() << "?\n1)Corriente\n2)Extra\n3)Ambas";
+            cout << "Qué tipo de combustible deseas transferir desde el operador hasta la bomba " << this->bomba.getMarca() << "?\n1)Corriente\n2)Extra\n3)Ambas" << endl;
             cin >> op;
             switch (op)
             {
@@ -93,9 +93,8 @@ public:
                     if (cant < (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
                         bomba.setCantidadCorr(bomba.getCantidadCorr()+cant);
                     } else if (cant > (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
-                        bomba.setCantidadCorr(bomba.getCapacidadCorr());
-                        provedor.setCantidadCorr(provedor.getCantidadCorr()-(bomba.getCapacidadCorr()-bomba.getCantidadCorr()));
-                        cout << "Se lleno el tanque de corriente a su capacidad máxima y se devolvió " << cant - (bomba.getCapacidadCorr()-bomba.getCantidadCorr()) << endl;
+                        cout << "No se permite valores por encima de la capacidad máxima (" << bomba.getCapacidadCorr() << ")\n";
+                        comp = true;
                     } else if (cant = 0) {
                         comp = true;
                         //Aquí agragar el uso de exepciones
@@ -112,14 +111,12 @@ public:
                     if (cant < (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
                         bomba.setCantidadExt(bomba.getCantidadExt()+cant);
                     } else if (cant > (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
-                        bomba.setCantidadExt(bomba.getCapacidadExt());
-                        provedor.setCantidadExt(provedor.getCantidadExt()-(bomba.getCapacidadExt()-bomba.getCantidadExt()));
-                        cout << "Se lleno el tanque de extra a su capacidad máxima y se devolvió " << cant - (bomba.getCapacidadExt()-bomba.getCantidadExt()) << endl;
+                        cout << "No se permite valores por encima de la capacidad máxima (" << bomba.getCapacidadExt() << ")\n";
+                        comp = true;
                     } else if (cant = 0) {
                         comp = true;
                         //Aquí agragar el uso de exepciones
                         cout << "Ingresa un valor valido" << endl;
-
                     }
                 } while (comp);
                 bomba.mostrarDatos();
@@ -165,18 +162,17 @@ class Cliente {
         bool gasolina = true;
         int consumo;
         consumo = getDinero() - bomba.calcularPrecios(gasolina, cantidad);
-        if (tipoGasolina == "Extra" || tipoGasolina == "extra") {
+        if (tipoGasolina == "Extra" || tipoGasolina == "extra") { //Establece el tipo de gasolina de compra
             gasolina = false;
         }
+        if (bomba.verificarCantidad(cantidad,gasolina)) { //Primero verifica la bomba tiene suficiente cantidad de la gasolina que se quiere comprar
 
-        if (bomba.verificarCantidad(cantidad,gasolina)) {
 
-
-            if (consumo>=0) {
+            if (consumo>=0) { //Luego verifica si al cliente le alcanza la plata
                 setDinero(consumo);
                 cout << "Compra exitosa " << getNombre() << "!!!" << endl;
                 cout << "Dinero (- " << bomba.calcularPrecios(gasolina, cantidad)<<"): " << endl;
-                if (gasolina) {
+                if (gasolina) { //Hace la compra según la gasolina elegida
                     bomba.setCantidadCorr(bomba.getCantidadCorr()-cantidad);
                     setCorriente(getCorriente()+cantidad);
                     bomba.registrarCorr(cantidad);
@@ -188,13 +184,14 @@ class Cliente {
             } else {
                 cout << "Saldo insuficiente para " << getNombre() << endl;
             }
-        } else {
+        } else { //Si no hay suficiente cantidad de gasolina en la bomba
             //Podria crar otro objeto bomba para igualarlo a mi bomba?? - Funciona, pero es buena práctica?
             Operador oper (bomba);
             cout << "\nInsuficiente combustible, redirigiendo con el operador..." << endl;
             oper.recargarBomba(provedor);
-            bomba = oper.getBomba();
-            //comprarGasolina() para volverlo a hacer. ??
+            bomba = oper.getBomba(); //Si no es bueno hacer esto, podría cambiarse por un método de la clase bomba que haga esto.
+            cout << "\nIntentando de nuevo la compra ...\n\n";
+            comprarGasolina(tipoGasolina, cantidad, bomba, provedor);
         }
     }
    void mostrarDatos() {
@@ -215,9 +212,7 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     cin >> tipG;
     cout << "Cuanto deseas tanquear?" << endl;
     cin >> gal;
-    cliente.comprarGasolina(tipG,gal,bomba,provedor); /*AQUÍ ES EL ERROR DE LÓGICA? (SUPOSICIÓN: los objetos que se cargan a la funcion 
-    comprarGasolina tienen el estado inicial con el que se enviaron a la funcion play, más no el de despues de ejecutar la funcion 
-    comprarGasolina que es la que les cambia el estado) */
+    cliente.comprarGasolina(tipG,gal,bomba,provedor); 
     cliente.mostrarDatos();
     cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
     cin >> quit;
