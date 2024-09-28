@@ -63,6 +63,9 @@ private:
         //Agregar datos de transacciones
         cout << getMarca()<<":  Combustible-> Corriente: "<<cantidadCorr << " /"<<capacidadCorr<<" Vendlida("<< registroCorr<< ") - Extra: "<<cantidadExt<<" /"<<capacidadExt<<" Venvida(" << registroExt << ")\n";
     }
+    void inline llenarAlMaximo() {
+        setCantidad(getCapacidadCorr(),getCapacidadExt());
+    }
 };
 
 class Operador {
@@ -73,27 +76,29 @@ public:
     Bombas getBomba() const {return bomba;}
 
     void recargarBomba(Bombas &provedor) {
-        //system("cls");
         int op;
-        cout << "\nHola, soy el provedor. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar la bomba desde otra con suficiente combustible?\n";
+        cout << "\nHola, soy el operador. Qué desea hacer?:\n1)Recargar la bomba desde el proveedor principal.\n2)Recargar el proveedor\n";
         cin >> op;
-        if (op=1) {
-            int cant, op;
+        if (op==1) {
+            int cant,otherCant, op;
             bool comp;
             provedor.mostrarDatos();
-            cout << "Qué tipo de combustible deseas transferir desde el operador hasta la bomba " << this->bomba.getMarca() << "?\n1)Corriente\n2)Extra\n3)Ambas" << endl;
+            cout << "Qué tipo de combustible deseas transferir desde el provedor hasta la bomba " << this->bomba.getMarca() << "?\n1)Corriente\n2)Extra\n3)Ambas" << endl;
             cin >> op;
             switch (op)
             {
             case 1:
-                cout << "Cuanto desdeas transferir de gasolina corriente desde el proveedor hasta la bomba?" << endl;
+                cout << "Cuanto deseas transferir de gasolina corriente desde el proveedor hasta la bomba?" << endl;
                 do {
+                    if (comp) {cout<<"Intenta de nuevo\n";}
                     cin >> cant;
                     //bomba.getCapacidadCorr()-bomba.getCantidadCorr()  Esto es lo que le falta a la bomba de combustible que se quiere proveer para llegar a su capacidad máxima
                     if (cant < (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
+                        comp = false;
                         bomba.setCantidadCorr(bomba.getCantidadCorr()+cant);
+                        provedor.setCantidadCorr(bomba.getCantidadCorr()-cant);
                     } else if (cant > (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
-                        cout << "No se permite valores por encima de la capacidad máxima (" << bomba.getCapacidadCorr() << ")\n";
+                        cout << "Intente con valores menores o iguales a "<<bomba.getCapacidadCorr()-bomba.getCantidadCorr()<<"\n";
                         comp = true;
                     } else if (cant = 0) {
                         comp = true;
@@ -104,14 +109,16 @@ public:
                 bomba.mostrarDatos();
                 break;
             case 2:
-                cout << "Cuanto desdeas transferir de gasolina extra desde el proveedor hasta la bomba?" << endl;
+                cout << "Cuanto deseas transferir de gasolina extra desde el proveedor hasta la bomba?" << endl;
                 do {
                     cin >> cant;
                     //bomba.getCapacidadExt()-bomba.getCantidadExt()  Esto es lo que le falta a la bomba de combustible que se quiere proveer para llegar a su capacidad máxima
-                    if (cant < (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                    if (cant <= (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
                         bomba.setCantidadExt(bomba.getCantidadExt()+cant);
-                    } else if (cant > (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
-                        cout << "No se permite valores por encima de la capacidad máxima (" << bomba.getCapacidadExt() << ")\n";
+                        provedor.setCantidadCorr(bomba.getCantidadCorr()-cant);
+                        comp = false;
+                    } else if (cant >= (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                        cout << "Intente con valores menores o iguales a "<<bomba.getCapacidadExt()-bomba.getCantidadExt()<<"\n";
                         comp = true;
                     } else if (cant = 0) {
                         comp = true;
@@ -120,20 +127,50 @@ public:
                     }
                 } while (comp);
                 bomba.mostrarDatos();
+                break;
+            case 3:
+                cout << "Cuanto deseas transferir de gasolina corriente desde el proveedor hasta la bomba?" << endl;
+                do {
+                    if (comp) {cout<<"Intenta de nuevo\n";}
+                    cin >> cant;
+                    if (cant < (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
+                        comp = false;
+                    } else if (cant > (bomba.getCapacidadCorr()-bomba.getCantidadCorr())) {
+                        cout << "Intente con valores menores o iguales a "<<bomba.getCapacidadCorr()-bomba.getCantidadCorr()<<"\n";
+                        comp = true;
+                    } else if (cant = 0) {
+                        comp = true;
+                        //Aquí agragar el uso de exepciones
+                        cout << "Ingresa un valor valido" << endl;
+                    }                    
+                } while (comp);
+                cout << "Cuanto deseas transferir de gasolina extra desde el proveedor hasta la bomba?" << endl;
+                do {
+                    if (comp) {cout<<"Intenta de nuevo\n";}
+                    cin >> otherCant;
+                    if (otherCant < (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                        comp = false;
+                    } else if (otherCant > (bomba.getCapacidadExt()-bomba.getCantidadExt())) {
+                        cout << "Intente con valores menores o iguales a "<<bomba.getCapacidadExt()-bomba.getCantidadExt()<<"\n";
+                        comp = true;
+                    } else if (cant = 0) {
+                        comp = true;
+                        //Aquí agragar el uso de exepciones
+                        cout << "Ingresa un valor valido" << endl;
+                    }                    
+                } while (comp);
+                bomba.setCantidad(bomba.getCantidadCorr()+cant,bomba.getCantidadExt()+otherCant);
+                provedor.setCantidad(provedor.getCantidadCorr()-cant,provedor.getCantidadExt()-otherCant);
+                break;
             default:
                 break;
             }
             //bomba = this->bomba; 
-        } else if (op=2) {
-            //usar el operador aqui
+        } else if (op==2) {
+            provedor.llenarAlMaximo();
         }
     }
 
-    //Este operador solo see aplicará a la bomba proveedor
-    Bombas operator+(Bombas &bomba) {
-        bomba.setCantidad(bomba.getCapacidadCorr(), bomba.getCapacidadExt());
-        return bomba;
-    }
 };
 class Cliente {
     private:
@@ -208,12 +245,13 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     dineroInicial = cliente.getDinero();
     while (quit)
     {    
-    cout << "Que tipo de gasolina deseas tanquear" << endl;
+    cout << "\n\nQue tipo de gasolina deseas tanquear" << endl;
     cin >> tipG;
     cout << "Cuanto deseas tanquear?" << endl;
     cin >> gal;
     cliente.comprarGasolina(tipG,gal,bomba,provedor); 
     cliente.mostrarDatos();
+    bomba.mostrarDatos();
     cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
     cin >> quit;
     quit = quit == 1;
@@ -297,7 +335,7 @@ int main()
         opCl--;
         cout << "Cliente seleccionado: ";
         clientes[opCl].mostrarDatos();
-        cout << "Selecciona una bomba \n";
+        cout << "\nSelecciona una bomba \n";
         for (int i = 0; i < bombas.size(); i++) {
             printf("%d)%s-> Capacidad Corriente: %d, Capacidad Extra: %d, Cantidad Corriente: %d, Cantidad Extra: %d\n",
                 i + 1,bombas[i].getMarca().c_str(), bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
@@ -318,8 +356,16 @@ int main()
         quit = quit == 1;
         system("cls");
     }
-    
-    
+    //Muestra la bomba con mayor ventas
+    int mayor=0;
+    for (int i = 0; i<bombas.size(); i++) {
+        if(bombas[i]>bombas[i-1]) {
+            mayor = i;
+            break;
+        }
+    }
+    cout << "\n\nBomba con mayor ventas: "<< endl;
+    bombas[mayor].mostrarDatos();
 
     return 0;
 }
