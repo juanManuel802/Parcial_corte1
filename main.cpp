@@ -241,14 +241,35 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     string tipG;
     int gal, gasto;
     float dineroInicial;
-    bool quit = true;
+    bool quit = true, ret;
     dineroInicial = cliente.getDinero();
     while (quit)
     {    
     cout << "\n\nQue tipo de gasolina deseas tanquear" << endl;
     cin >> tipG;
     cout << "Cuanto deseas tanquear?" << endl;
-    cin >> gal;
+    //Aqui agregar exepciones para que no ingrese un valor por encima de la capacidad maxima de la bomba
+    do {
+        try {
+            if (ret) {
+                cout << "Intenta de nuevo: " << endl;
+            }
+            cin >> gal;
+            if (gal<=0) {
+                throw "Negativo o nulo";
+                ret = true;
+            } 
+            else if ((tipG=="corriente"||tipG=="Corriente")&&(gal > bomba.getCapacidadCorr())) {
+                throw "Por encima de la capacidad máxima de la bomba";
+                ret = true;
+            } else if ((tipG=="extra"||tipG=="Extra")&&(gal > bomba.getCapacidadExt())) {
+                throw "Por encima de la capacidad máxima de la bomba";
+                ret = true;
+            }
+        } catch (const char *e) {
+            cout << "Valor ingresado fuera del rango: " << e << endl;
+        }
+    }while (ret);
     cliente.comprarGasolina(tipG,gal,bomba,provedor); 
     cliente.mostrarDatos();
     bomba.mostrarDatos();
