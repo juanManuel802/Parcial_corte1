@@ -1,10 +1,59 @@
 #include <iostream>
+#include <exception>
 #include <vector>
 #include <cstdio>
+#include "misExcepciones/rango.h"
 #include "bomba.h"
 #include "operador.h"
 #include "cliente.h"
 using namespace std;
+
+bool selectElement(int range) {
+    bool restart;
+    int element;
+    do {
+        try {
+            if(restart) cout << "Intenta de nuevo" << endl;
+            cin >> element;
+            if (element>range || element<=0) {
+                throw rango(); //excepcion creada a partir de la librería
+            } else {
+                restart = false;
+            }
+        } catch (const rango &e) {
+            cout << e.what() << endl;
+            cin.clear();
+            cin.ignore();
+            restart = true;
+        }
+    } while (restart);
+
+    return element;
+}
+
+int getOption () {
+    bool restart, quit;
+    int quitN = 0;
+    do {
+        try {
+            if(restart) cout << "Intenta de nuevo" << endl;
+            cin >> quitN;
+            if (quitN != 0 && quitN != 1) {
+                throw invalid_argument("Valor ingresado no valido"); //excepcion propia de la librería
+            } else {
+                restart = false;
+            }
+        } catch (const invalid_argument &e) {
+            cout << e.what() << endl;
+            cin.clear();
+            cin.ignore();
+            restart = true;
+        }
+    } while (restart);
+
+    quit = quitN == 1; 
+    return quit;
+}
 
 void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     string tipG;
@@ -20,9 +69,7 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     //Aqui agregar exepciones para que no ingrese un valor por encima de la capacidad maxima de la bomba
     do {
         try {
-            if (ret) {
-                cout << "Intenta de nuevo: " << endl;
-            }
+            if (ret) cout << "Intenta de nuevo: " << endl;
             cin >> gal;
             if (gal<=0) {
                 throw "Negativo o nulo";
@@ -43,8 +90,7 @@ void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
     cliente.mostrarDatos();
     bomba.mostrarDatos();
     cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
-    cin >> quit;
-    quit = quit == 1;
+    quit = getOption();
     }
     system("cls");
     
@@ -63,7 +109,7 @@ int main()
         int corriente, extra;
         float dinero;
         printf("Ingresa el nombre del usuario %d: ", count);
-        getline(cin, nombre);
+        cin >> nombre;
         printf("Ingresa el dinero del usuario %d: ", count);
         cin >> dinero;
         cin.ignore(); 
@@ -79,8 +125,7 @@ int main()
 
         printf("Cliente agregado: %s\n", Cliente.getNombre().c_str());
         printf("¿Desea agregar otro cliente? (1 para sí, 0 para no): ");
-        cin >> quit;
-        cin.ignore();
+        quit = getOption();
         count++;
     } 
     system("cls");
@@ -97,9 +142,9 @@ int main()
         printf("Ingresa la capacidad máxima de almacenamiento del tanque de gasolina extra: ");
         cin >> capacidadExt;
         printf("Ingresa la cantidad de gasolina corriente: ");
-        cin >> cantidadCorr;
+        cantidadCorr = selectElement(capacidadCorr);
         printf("Ingresa la cantidad de gasolina extra: ");
-        cin >> cantidadExt;
+        cantidadExt = selectElement(capacidadExt);
 
         Bombas Bomba(marca, capacidadCorr, capacidadExt, cantidadCorr, cantidadExt);
         bombas.push_back(Bomba);
@@ -108,8 +153,7 @@ int main()
                capacidadCorr, capacidadExt, cantidadCorr, cantidadExt);
 
         printf("¿Desea agregar otra bomba? (1 para sí, 0 para no): ");
-        cin >> quit;
-        quit = quit == 1;
+        quit = getOption();
     }
     system("cls");
     //Parte de selección de objetos a utilizar e implementacion de la bomba
@@ -121,7 +165,7 @@ int main()
         for (int i = 0; i < clientes.size(); i++) {
             printf("%d) %s.\n", i+1, clientes[i].getNombre().c_str());
         }
-        cin >> opCl;
+        opCl = selectElement(clientes.size());
         opCl--;
         cout << "Cliente seleccionado: ";
         clientes[opCl].mostrarDatos();
@@ -131,7 +175,7 @@ int main()
                 i + 1,bombas[i].getMarca().c_str(), bombas[i].getCapacidadCorr(), bombas[i].getCapacidadExt(),
                 bombas[i].getCantidadCorr(), bombas[i].getCantidadExt());
         }
-        cin >> opBm;
+        opBm = selectElement(bombas.size());
         opBm--;
         cout << "Bomba seleccionada: ";
         bombas[opBm].mostrarDatos();
@@ -142,8 +186,7 @@ int main()
         bombas[opBm].mostrarDatos();
         system("cls");
         cout << "Gracias por utilizar nuestro servicio.\nDeseas seguir en el programa? (1 para si, 0 para no)" <<endl;
-        cin >> quit;
-        quit = quit == 1;
+        quit = getOption();
         system("cls");
     }
     //Muestra la bomba con mayor ventas
