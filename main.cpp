@@ -8,93 +8,9 @@
 #include "cliente.h"
 using namespace std;
 
-bool selectElement(int range) {
-    bool restart;
-    int element;
-    do {
-        try {
-            if(restart) cout << "Intenta de nuevo" << endl;
-            cin >> element;
-            if (element>range || element<=0) {
-                throw rango(); //excepcion creada a partir de la librería
-            } else {
-                restart = false;
-            }
-        } catch (const rango &e) {
-            cout << e.what() << endl;
-            cin.clear();
-            cin.ignore();
-            restart = true;
-        }
-    } while (restart);
-
-    return element;
-}
-
-int getOption () {
-    bool restart, quit;
-    int quitN = 0;
-    do {
-        try {
-            if(restart) cout << "Intenta de nuevo" << endl;
-            cin >> quitN;
-            if (quitN != 0 && quitN != 1) {
-                throw invalid_argument("Valor ingresado no valido"); //excepcion propia de la librería
-            } else {
-                restart = false;
-            }
-        } catch (const invalid_argument &e) {
-            cout << e.what() << endl;
-            cin.clear();
-            cin.ignore();
-            restart = true;
-        }
-    } while (restart);
-
-    quit = quitN == 1; 
-    return quit;
-}
-
-void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
-    string tipG;
-    int gal, gasto;
-    float dineroInicial;
-    bool quit = true, ret;
-    dineroInicial = cliente.getDinero();
-    while (quit)
-    {    
-    cout << "\n\nQue tipo de gasolina deseas tanquear" << endl;
-    cin >> tipG;
-    cout << "Cuanto deseas tanquear?" << endl;
-    //Aqui agregar exepciones para que no ingrese un valor por encima de la capacidad maxima de la bomba
-    do {
-        try {
-            if (ret) cout << "Intenta de nuevo: " << endl;
-            cin >> gal;
-            if (gal<=0) {
-                throw "Negativo o nulo";
-            } 
-            else if ((tipG=="corriente"||tipG=="Corriente")&&(gal > bomba.getCapacidadCorr())) {
-                throw "Por encima de la capacidad máxima de la bomba";
-            } else if ((tipG=="extra"||tipG=="Extra")&&(gal > bomba.getCapacidadExt())) {
-                throw "Por encima de la capacidad máxima de la bomba";
-            } else {
-                ret = false;
-            }
-        } catch (const char *e) {
-            cout << "Valor ingresado fuera del rango: " << e << endl;
-            ret = true;
-        }
-    }while (ret);
-    cliente.comprarGasolina(tipG,gal,bomba,provedor); 
-    cliente.mostrarDatos();
-    bomba.mostrarDatos();
-    cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
-    quit = getOption();
-    }
-    system("cls");
-    
-}
+bool selectElement(int range);
+int getOption ();
+void play (Cliente &cliente, Bombas &bomba, Bombas &provedor);
 
 int main()
 {
@@ -202,4 +118,92 @@ int main()
 
     return 0;
 }
+bool selectElement(int range) {
+    bool restart;
+    int element;
+    do {
+        try {
+            if(restart) cout << "Intenta de nuevo" << endl;
+            cin >> element;
+            if (element>range || element<=0) {
+                throw rango(); //excepcion creada a partir de la librería
+            } else {
+                restart = false;
+            }
+        } catch (const rango &e) {
+            cout << e.what() << endl;
+            cin.clear();
+            cin.ignore();
+            restart = true;
+        }
+    } while (restart);
+
+    return element;
+}
+
+int getOption () {
+    bool restart, quit;
+    int quitN = 0;
+    do {
+        try {
+            if(restart) cout << "Intenta de nuevo" << endl;
+            cin >> quitN;
+            if (quitN != 0 && quitN != 1) {
+                throw invalid_argument("Valor ingresado no valido"); //excepcion propia de la librería
+            } else {
+                restart = false;
+            }
+        } catch (const invalid_argument &e) {
+            cout << e.what() << endl;
+            cin.clear();
+            cin.ignore();
+            restart = true;
+        }
+    } while (restart);
+
+    quit = quitN == 1; 
+    return quit;
+}
+
+void play (Cliente &cliente, Bombas &bomba, Bombas &provedor) {
+    string tipG;
+    int gal, gasto;
+    float dineroInicial;
+    bool quit = true, ret;
+    dineroInicial = cliente.getDinero();
+    while (quit)
+    {    
+    cout << "\n\nQue tipo de gasolina deseas tanquear" << endl;
+    cin >> tipG;
+    cout << "Cuanto deseas tanquear?" << endl;
+    //Aqui agregar exepciones para que no ingrese un valor por encima de la capacidad maxima de la bomba
+    do {
+        try {
+            if (ret) cout << "Intenta de nuevo: " << endl;
+            cin >> gal;
+            if (gal<=0) {
+                throw "Negativo o nulo";
+            } 
+            else if ((tipG=="corriente"||tipG=="Corriente")&&(gal > bomba.getCapacidadCorr())) {
+                throw "Por encima de la capacidad máxima de la bomba";
+            } else if ((tipG=="extra"||tipG=="Extra")&&(gal > bomba.getCapacidadExt())) {
+                throw "Por encima de la capacidad máxima de la bomba";
+            } else {
+                ret = false;
+            }
+        } catch (const char *e) {
+            cout << "Valor ingresado fuera del rango: " << e << endl;
+            ret = true;
+        }
+    }while (ret);
+    cliente.comprarGasolina(tipG,gal,bomba,provedor); 
+    cliente.mostrarDatos();
+    bomba.mostrarDatos();
+    cout <<"\n\nDeseas volver a tanquear en la misma bomba con el mismo usuario? (1 para si, 0 para no)\n";
+    quit = getOption();
+    }
+    system("cls");
+    
+}
+
 //Mostrar m+as datos (verificación de funcionamiento)
