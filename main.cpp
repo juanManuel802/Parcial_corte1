@@ -5,7 +5,7 @@
 #include "misExcepciones/rango.h"
 #include "bomba.h"
 #include "operador.h"
-#include "cliente.h"
+#include "cliente.h" 
 using namespace std;
 
 bool selectElement(int range);
